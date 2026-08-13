@@ -1,0 +1,9 @@
+services:
+  pdf-triage-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pdf_triage_extractor
+    ports:
+      - "8000:8000"
+    restart: unless-stopped

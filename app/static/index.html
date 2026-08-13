@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محلل ومستخرج نصوص PDF متعدد اللغات | PDF Triage & Extractor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">📄⚡</div>
+                <div>
+                    <h1>مستخرج ومحلل نصوص الـ PDF الذكي</h1>
+                    <p>Multilingual PDF Triage & Multi-Format Text Extractor</p>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="pill-badge">دعم كامل: عربي • فارسي • أجنبي</span>
+                <span class="pill-badge accent">Production Ready</span>
+            </div>
+        </header>
+
+        <main class="main-layout">
+            <!-- Upload Dropzone Section -->
+            <section class="upload-section card-glass" id="upload-section">
+                <div class="dropzone" id="dropzone">
+                    <input type="file" id="file-input" accept=".pdf" hidden>
+                    <div class="dropzone-icon">📥</div>
+                    <h3>اسحب وأسقط كتابك الـ PDF هنا</h3>
+                    <p>أو اضغط لتصفح الملفات من جهازك (دعم غير محدود لكافة اللغات)</p>
+                    <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">اختيار كتاب PDF</button>
+                </div>
+
+                <!-- Processing Spinner -->
+                <div class="loading-state hidden" id="loading-state">
+                    <div class="spinner"></div>
+                    <h3 id="loading-title">جاري فحص وتطبيق خوارزمية التشخيص...</h3>
+                    <p>فحص خطوط ToUnicode، البنية الهيكلية، الحماية، واستخراج النص الصريح.</p>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section hidden" id="results-section">
+                <!-- Summary Bar -->
+                <div class="summary-card card-glass">
+                    <div class="summary-header">
+                        <div>
+                            <span class="file-name-tag" id="res-file-name">document.pdf</span>
+                            <h2 id="res-overall-status">النتيجة: COPY_ALL</h2>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-outline" onclick="resetApp()">رفع كتاب آخر 🔄</button>
+                            <button class="btn btn-success" id="btn-download-zip">تحميل حزمة ZIP الشاملة 📦</button>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Counter Cards -->
+                    <div class="stats-row">
+                        <div class="stat-card copy-stat">
+                            <div class="stat-num" id="stat-copy">0</div>
+                            <div class="stat-label">صفحات قابلة للنسخ (COPY)</div>
+                        </div>
+                        <div class="stat-card ocr-stat">
+                            <div class="stat-num" id="stat-ocr">0</div>
+                            <div class="stat-label">تحتاج OCR (ممسوحة/تالفة)</div>
+                        </div>
+                        <div class="stat-card review-stat">
+                            <div class="stat-num" id="stat-review">0</div>
+                            <div class="stat-label">تتطلب مراجعة (REVIEW)</div>
+                        </div>
+                        <div class="stat-card total-stat">
+                            <div class="stat-num" id="stat-total">0</div>
+                            <div class="stat-label">إجمالي عدد الصفحات</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Split Grid -->
+                <div class="content-grid">
+                    <!-- Left Sidebar: Pages Breakdown List -->
+                    <div class="pages-sidebar card-glass">
+                        <div class="sidebar-top">
+                            <h3>تقييم الصفحات تفصيلياً</h3>
+                            <input type="text" id="page-search" placeholder="بحث برقم الصفحة أو التقييم..." class="search-input">
+                        </div>
+                        <div class="pages-list" id="pages-list">
+                            <!-- Page items rendered via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right Main Area: Multi-Format Preview & Downloads -->
+                    <div class="preview-area card-glass">
+                        <div class="preview-header">
+                            <div class="tabs-bar">
+                                <button class="tab-btn active" data-tab="preview-html">معاينة HTML 🌐</button>
+                                <button class="tab-btn" data-tab="preview-txt">نص خام TXT 📄</button>
+                                <button class="tab-btn" data-tab="preview-md">ماركداون MD 📝</button>
+                                <button class="tab-btn" data-tab="preview-json">بيانات JSON 📊</button>
+                            </div>
+                            <div class="download-bar">
+                                <button class="btn btn-sm" id="btn-dl-txt">تحميل .txt</button>
+                                <button class="btn btn-sm" id="btn-dl-md">تحميل .md</button>
+                                <button class="btn btn-sm" id="btn-dl-json">تحميل .json</button>
+                                <button class="btn btn-sm" id="btn-dl-html">تحميل .html</button>
+                            </div>
+                        </div>
+
+                        <!-- Tab Content Containers -->
+                        <div class="tab-content active" id="preview-html">
+                            <iframe id="html-iframe" class="html-preview-frame" title="HTML Output Preview"></iframe>
+                        </div>
+                        <div class="tab-content" id="preview-txt">
+                            <pre class="code-view" id="txt-code-view"></pre>
+                        </div>
+                        <div class="tab-content" id="preview-md">
+                            <pre class="code-view" id="md-code-view"></pre>
+                        </div>
+                        <div class="tab-content" id="preview-json">
+                            <pre class="code-view" id="json-code-view"></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
